@@ -1,3 +1,16 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require "lazy_time"
+require "lazy_time/cli"
+
+Signal.trap("INT") do
+  warn("\n#{caller.join("\n")}: interrupted")
+  exit(1)
+end
+
+begin
+  LazyTime::CLI.start
+rescue LazyTime::CLI::Error => e
+  puts "ERROR: #{e.message}"
+  exit 1
+end
