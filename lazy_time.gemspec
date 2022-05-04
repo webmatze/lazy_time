@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Mathias Karstädt"]
   spec.email = ["mathias.karstaedt@gmail.com"]
 
-  spec.summary = "A tool to track you working hours"
-  spec.description = "A tool to track you working hours"
+  spec.summary = "A tool to track your working hours"
+  spec.description = "A tool to track your working hours"
   spec.homepage = "https://webmatze.de"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 2.6.0"
@@ -33,7 +33,11 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency "thor", "~> 1.2.1"
+  spec.add_dependency "tty-cursor", "~> 0.7.1"
+  spec.add_dependency "tty-editor", "~> 0.7.0"
+  spec.add_dependency "tty-font", "~> 0.5.0"
   spec.add_dependency "tty-prompt", "~> 0.23.1"
+  spec.add_dependency "tty-screen", "~> 0.8.1"
 
   # For more information and examples about making a new gem, check out our
   # guide at: https://bundler.io/guides/creating_gem.html
