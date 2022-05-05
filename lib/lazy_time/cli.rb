@@ -5,7 +5,13 @@ require "pastel"
 require "tty-font"
 
 module LazyTime
+  # This handles all command line parsing
+  # and calls our different commands.
+  #
+  # @api public
   class CLI < Thor
+    # Lets overwrite Thor's help method and
+    # add some LazyTime branding.
     def help(*args)
       font = TTY::Font.new(:standard)
       pastel = Pastel.new(enabled: !options["no-color"])

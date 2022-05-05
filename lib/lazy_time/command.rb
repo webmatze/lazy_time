@@ -1,8 +1,14 @@
 # frozen_string_literal: true
 
+require "tty-config"
+require "tty-prompt"
+
 module LazyTime
+  # This is the base class for all our commands.
   class Command
     trap("SIGINT") { exit }
+
+    def initialize(*); end
 
     # Main configuration
     # @api public
@@ -17,6 +23,9 @@ module LazyTime
       end
     end
 
+    # Adds colors to strings
+    #
+    # @api public
     def add_color(str, color)
       @options["no-color"] || color == :none ? str : @pastel.decorate(str, color)
     end
@@ -29,6 +38,28 @@ module LazyTime
         NotImplementedError,
         "#{self.class}##{__method__} must be implemented"
       )
+    end
+
+    # Create a prompt
+    #
+    # @see http://www.rubydoc.info/gems/tty-prompt
+    #
+    # @api public
+    def prompt(input, output)
+      prompt = TTY::Prompt.new(
+        prefix: "[#{add_color("?", :yellow)}] ",
+        input: input, output: output,
+        interrupt: lambda {
+                     puts
+                     exit 1
+                   },
+        enable_color: !@options["no-color"]
+      )
+      prompt.on(:keypress) do |event|
+        prompt.trigger(:keydown) if event.value == "j"
+        prompt.trigger(:keyup) if event.value == "k"
+      end
+      prompt
     end
 
     # The cursor movement

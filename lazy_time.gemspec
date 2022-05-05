@@ -33,6 +33,8 @@ Gem::Specification.new do |spec|
 
   # Uncomment to register a new dependency of your gem
   spec.add_dependency "thor", "~> 1.2.1"
+  spec.add_dependency "toml", "~> 0.3.0"
+  spec.add_dependency "tty-config", "~> 0.5.1"
   spec.add_dependency "tty-cursor", "~> 0.7.1"
   spec.add_dependency "tty-editor", "~> 0.7.0"
   spec.add_dependency "tty-font", "~> 0.5.0"

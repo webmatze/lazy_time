@@ -2,8 +2,7 @@
 
 require_relative "lazy_time/version"
 
+# This is our namespace
 module LazyTime
   class Error < StandardError; end
-  # Your code goes here...
-  puts "hello lazy_time"
 end
