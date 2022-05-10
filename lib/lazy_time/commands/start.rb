@@ -19,8 +19,12 @@ module LazyTime
       end
 
       def execute(input: $stdin, output: $stdout)
-        selected_task = select_task(input, output)
+        tasks = load_tasks
+        running_task = load_running_task
+        show_running_task(running_task, output)
+        selected_task = select_task(tasks, input, output)
         task = new_task(selected_task)
+        stop_running_task(running_task, output)
         save_current_task(task)
         print_task(task, output)
       end
@@ -39,8 +43,25 @@ module LazyTime
         tasks
       end
 
-      def select_task(input, output)
-        tasks = load_tasks
+      def load_running_task
+        current_task = config.fetch("current_task")
+        return if current_task.nil?
+
+        current_task
+      end
+
+      def show_running_task(running_task, output)
+        output.puts "Current Task"
+        print_task(running_task, output)
+      end
+
+      def stop_running_task(running_task, output)
+        running_task["stop"] = Time.now.to_s
+        output.puts "Current Tasks stopped!"
+        print_task(running_task, output)
+      end
+
+      def select_task(tasks, input, output)
         merged_tasks = tasks.flat_map(&:last)
         select_task_prompt = prompt(input, output)
         select_task_prompt.select("Choose a task", merged_tasks, filter: true, echo: false)
@@ -48,9 +69,9 @@ module LazyTime
 
       def new_task(name)
         {
-          name: name,
-          start: Time.now.to_s,
-          stop: nil
+          "name" => name,
+          "start" => Time.now.to_s,
+          "stop" => nil
         }
       end
 
@@ -62,8 +83,9 @@ module LazyTime
       def print_task(task, output)
         output.puts
         output.puts "Tracking"
-        output.puts "  Task    #{add_color(task[:name], :green)}"
-        output.puts "  Started #{add_color(task[:start], :yellow)}"
+        output.puts "  Task    #{add_color(task["name"], :green)}"
+        output.puts "  Started #{add_color(task["start"], :yellow)}"
+        output.puts "  Stopped #{add_color(task["stop"], :yellow)}" unless task["stop"].nil?
         output.puts
       end
 
