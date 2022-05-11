@@ -4,6 +4,7 @@ require "pastel"
 require "time"
 
 require_relative "../command"
+require_relative "../task"
 
 module LazyTime
   module Commands
@@ -47,7 +48,7 @@ module LazyTime
         current_task = config.fetch("current_task")
         return if current_task.nil?
 
-        current_task
+        Task.from_hash current_task
       end
 
       def show_running_task(running_task, output)
@@ -56,7 +57,7 @@ module LazyTime
       end
 
       def stop_running_task(running_task, output)
-        running_task["stop"] = Time.now.to_s
+        running_task.stop!
         output.puts "Current Tasks stopped!"
         print_task(running_task, output)
       end
@@ -68,24 +69,22 @@ module LazyTime
       end
 
       def new_task(name)
-        {
-          "name" => name,
-          "start" => Time.now.to_s,
-          "stop" => nil
-        }
+        task = Task.new(name: name)
+        task.start!
+        task
       end
 
       def save_current_task(task)
-        config.set(:current_task, value: task)
+        config.set(:current_task, value: task.to_h)
         config.write(force: true)
       end
 
       def print_task(task, output)
         output.puts
         output.puts "Tracking"
-        output.puts "  Task    #{add_color(task["name"], :green)}"
-        output.puts "  Started #{add_color(task["start"], :yellow)}"
-        output.puts "  Stopped #{add_color(task["stop"], :yellow)}" unless task["stop"].nil?
+        output.puts "  Task    #{add_color(task.name, :green)}"
+        output.puts "  Started #{add_color(task.start, :yellow)}"
+        output.puts "  Stopped #{add_color(task.stop, :yellow)}" unless task.stop.nil?
         output.puts
       end
 
