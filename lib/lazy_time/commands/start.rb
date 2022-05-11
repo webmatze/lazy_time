@@ -5,6 +5,7 @@ require "time"
 
 require_relative "../command"
 require_relative "../task"
+require_relative "../task_repository"
 
 module LazyTime
   module Commands
@@ -17,39 +18,21 @@ module LazyTime
         @options = options
         @pastel = Pastel.new
         config.set("settings", "color", value: !@options["no-color"])
+        @task_repository = TaskRepository.new config
       end
 
       def execute(input: $stdin, output: $stdout)
-        tasks = load_tasks
-        running_task = load_running_task
+        task_names = @task_repository.load_tasks
+        running_task = @task_repository.load_running_task
         show_running_task(running_task, output)
-        selected_task = select_task(tasks, input, output)
-        task = new_task(selected_task)
+        selected_task_name = select_task(task_names, input, output)
+        new_task = new_task(selected_task_name)
         stop_running_task(running_task, output)
-        save_current_task(task)
-        print_task(task, output)
+        @task_repository.save_current_task(new_task)
+        print_task(new_task, output)
       end
 
       private
-
-      def load_tasks
-        config_saved = config.exist?
-        config.read if config_saved
-        tasks = config.fetch("tasks")
-        if tasks.nil? || tasks.empty?
-          task_init = setup_tasks
-          config.set(:tasks, value: task_init)
-          config.write(create: !config_saved)
-        end
-        tasks
-      end
-
-      def load_running_task
-        current_task = config.fetch("current_task")
-        return if current_task.nil?
-
-        Task.from_hash current_task
-      end
 
       def show_running_task(running_task, output)
         output.puts "Current Task"
@@ -74,11 +57,6 @@ module LazyTime
         task
       end
 
-      def save_current_task(task)
-        config.set(:current_task, value: task.to_h)
-        config.write(force: true)
-      end
-
       def print_task(task, output)
         output.puts
         output.puts "Tracking"
@@ -86,20 +64,6 @@ module LazyTime
         output.puts "  Started #{add_color(task.start, :yellow)}"
         output.puts "  Stopped #{add_color(task.stop, :yellow)}" unless task.stop.nil?
         output.puts
-      end
-
-      def setup_tasks
-        {
-          default: %w[
-            coding
-            documentation
-            meeting
-            daily
-            retro
-          ],
-          added: nil,
-          external: nil
-        }
       end
     end
   end
