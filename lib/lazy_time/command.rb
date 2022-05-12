@@ -49,10 +49,11 @@ module LazyTime
       prompt = TTY::Prompt.new(
         prefix: "[#{add_color("?", :yellow)}] ",
         input: input, output: output,
-        interrupt: lambda {
-                     puts
-                     exit 1
-                   },
+        interrupt: :error,
+        # interrupt: lambda {
+        #              output.puts
+        #              exit 1
+        #            },
         enable_color: !@options["no-color"]
       )
       prompt.on(:keypress) do |event|

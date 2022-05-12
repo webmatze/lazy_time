@@ -22,14 +22,14 @@ module LazyTime
     end
 
     def load_running_task
-      current_task = config.fetch("current_task")
+      current_task = config.fetch("current")
       return if current_task.nil?
 
       Task.from_hash current_task
     end
 
     def save_current_task(task)
-      config.set(:current_task, value: task.to_h)
+      config.set(:current, value: task.to_h)
       config.write(force: true)
     end
 
@@ -44,8 +44,8 @@ module LazyTime
           daily
           retro
         ],
-        added: nil,
-        external: nil
+        current: nil,
+        added: nil
       }
     end
   end

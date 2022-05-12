@@ -36,10 +36,17 @@ module LazyTime
 
       def show_running_task(running_task, output)
         output.puts "Current Task"
-        print_task(running_task, output)
+        if running_task
+          print_task(running_task, output)
+        else
+          output.puts add_color("  No Task running!", :red)
+          output.puts
+        end
       end
 
       def stop_running_task(running_task, output)
+        return unless running_task
+
         running_task.stop!
         output.puts "Current Tasks stopped!"
         print_task(running_task, output)
@@ -47,8 +54,20 @@ module LazyTime
 
       def select_task(tasks, input, output)
         merged_tasks = tasks.flat_map(&:last)
-        select_task_prompt = prompt(input, output)
-        select_task_prompt.select("Choose a task", merged_tasks, filter: true, echo: false)
+        prompt(input, output).select("Choose a task", filter: true, echo: false) do |menu|
+          menu.choice "Enter a task name...", -> { prompt(input, output).ask("Enter a new name:", required: true) }
+          merged_tasks.each do |task|
+            menu.choice task
+          end
+        end
+      rescue TTY::Reader::InputInterrupt => _e
+        output.puts
+        begin
+          prompt(input, output).ask("Enter a task name: ", required: true)
+        rescue TTY::Reader::InputInterrupt => _e
+          output.puts
+          exit 1
+        end
       end
 
       def new_task(name)
